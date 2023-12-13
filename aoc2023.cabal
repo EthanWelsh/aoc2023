@@ -2,14 +2,12 @@ cabal-version:       2.2
 
 name:                aoc2023
 version:             0.1.0.0
--- synopsis:
--- description:
-homepage:            https://github.com/githubuser/aoc2023#readme
+homepage:            https://github.com/EthanWelsh/aoc2023#readme
 license:             Unlicense
 license-file:        LICENSE
-author:              Author name here
+author:              Ethan Welsh
 maintainer:          example@example.com
-copyright:           2023 Author name here
+copyright:           2023 Ethan Welsh
 category:            Web
 build-type:          Simple
 extra-source-files:  README.md
