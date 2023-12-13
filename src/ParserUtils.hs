@@ -10,13 +10,15 @@ module ParserUtils (
     dot,
     pipe,
     parens,
+    skipSpaces,
 )
 where
 
 import Data.Void (Void)
-import Text.Megaparsec (Parsec, between, empty)
-import Text.Megaparsec.Char (space1)
+import Text.Megaparsec (Parsec, between, empty, many)
+import Text.Megaparsec.Char (space1, string)
 import qualified Text.Megaparsec.Char.Lexer as L
+import Control.Monad (void)
 
 type Parser = Parsec Void String
 
@@ -49,3 +51,6 @@ pipe = symbol "|"
 
 parens :: Parser a -> Parser a
 parens = between (symbol "(") (symbol ")")
+
+skipSpaces :: Parser ()
+skipSpaces = void $ many (string " ")

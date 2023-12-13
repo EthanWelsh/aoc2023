@@ -1,7 +1,7 @@
 module Day06.Day06 (solve) where
 
 import Control.Monad (void)
-import ParserUtils (Parser, integer)
+import ParserUtils (Parser, integer, skipSpaces)
 import Text.Megaparsec
 import Text.Megaparsec.Char (string)
 
@@ -12,10 +12,6 @@ data Race = Race { time :: Int
 
 data Action = Action { holdTime :: Int
                      , remainingTime :: Int } deriving (Show)
-
-
-skipSpaces :: Parser ()
-skipSpaces = void $ many (string " ")
 
 parseInput :: Parser Input
 parseInput = do
