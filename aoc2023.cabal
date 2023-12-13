@@ -23,6 +23,9 @@ executable aoc2023
                      , megaparsec >= 9.0 && < 10
                      , extra
                      , containers
+                     , vector-algorithms
+                     , vector
+                     , data-interval
   ghc-options:         -Wall
                        -Wcompat
                        -Widentities

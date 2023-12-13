@@ -5,6 +5,7 @@ import qualified Day01.Day01 as Day01
 import qualified Day02.Day02 as Day02
 import qualified Day03.Day03 as Day03
 import qualified Day04.Day04 as Day04
+import qualified Day05.Day05 as Day05
 import System.Environment (getArgs)
 
 solvers :: [FilePath -> IO ()]
@@ -14,6 +15,7 @@ solvers =
     , Day02.solve
     , Day03.solve
     , Day04.solve
+    , Day05.solve
     ]
 
 main :: IO ()
