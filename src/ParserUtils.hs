@@ -11,11 +11,12 @@ module ParserUtils (
     pipe,
     parens,
     skipSpaces,
+    charInRange
 )
 where
 
 import Data.Void (Void)
-import Text.Megaparsec (Parsec, between, empty, many)
+import Text.Megaparsec (Parsec, between, empty, many, satisfy)
 import Text.Megaparsec.Char (space1, string)
 import qualified Text.Megaparsec.Char.Lexer as L
 import Control.Monad (void)
@@ -54,3 +55,6 @@ parens = between (symbol "(") (symbol ")")
 
 skipSpaces :: Parser ()
 skipSpaces = void $ many (string " ")
+
+charInRange :: Char -> Char -> Parser Char
+charInRange start end = satisfy (\x -> x >= start && x <= end)

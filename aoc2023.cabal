@@ -24,6 +24,7 @@ executable aoc2023
                      , vector-algorithms
                      , vector
                      , data-interval
+                     , hashmap
   ghc-options:         -Wall
                        -Wcompat
                        -Widentities
