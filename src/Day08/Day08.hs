@@ -4,24 +4,20 @@ import Control.Monad (void)
 import ParserUtils (Parser, integer, charInRange)
 import Text.Megaparsec
 import Text.Megaparsec.Char (string, char, newline)
-import Data.HashMap
+import qualified Data.HashMap as HM
+import Data.Maybe (fromJust)
+import Data.List (findIndex)
 
 data Direction = L | R deriving  (Show, Eq)
 type Room = String
-type Maze = Map Room (Room, Room)
+type Maze = HM.Map Room (Room, Room)
 data Input = Input { dirs :: [Direction], maze :: Maze } deriving (Show)
-
-start :: Room
-start = "AAA"
-
-end :: Room
-end = "ZZZ"
 
 directionParser :: Parser Direction
 directionParser = choice [R <$ char 'R', L <$ char 'L']
 
 roomParser :: Parser Room
-roomParser = count 3 (charInRange 'A' 'Z')
+roomParser = count 3 (charInRange 'A' 'Z' <|> charInRange '0' '9')
 
 lineParser :: Parser (Room, (Room, Room))
 lineParser = do
@@ -38,21 +34,36 @@ parseInput = do
   dirs <- manyTill directionParser newline
   void $ newline
   lines <- lineParser `sepBy` newline
-  let m = fromList lines
+  let m = HM.fromList lines
   return $ (Input dirs m)
 
-step :: Maze -> Room -> Direction -> Room
-step m r L = fst (m ! r)
-step m r R = snd (m ! r)
+step :: Maze -> Direction -> Room -> Room
+step m L r = fst (m HM.! r)
+step m R r = snd (m HM.! r)
+
+stepsToEnd :: Maze -> (Room -> Bool) -> [Direction] -> Room -> Int
+stepsToEnd m isEnd (d:ds) r = if isEnd r then 0 else 1 + remainingSteps
+  where
+    remainingSteps = stepsToEnd m isEnd ds (step m d r)
 
 part1 :: Input -> IO ()
 part1 input = do
   putStr $ "Part 1: "
-  print input
+  let ds = (concat . repeat) $ dirs input :: [Direction]
+  let m = maze input
+  print $ stepsToEnd m (=="ZZZ") ds "AAA"
+
+stepsToEndPt2 :: Maze -> [Room] -> [Direction] -> Int
+stepsToEndPt2 m rs ds = foldl1 lcm $ map (stepsToEnd m isEnd ds) rs
+  where isEnd room = 'Z' == last room
 
 part2 :: Input -> IO ()
 part2 input = do
   putStr "Part 2: "
+  let ds = (concat . repeat) $ dirs input :: [Direction]
+  let m = maze input
+  let starts = filter ((=='A') . last) (HM.keys m)
+  print $ stepsToEndPt2 m starts ds
 
 solve :: FilePath -> IO ()
 solve filePath = do
