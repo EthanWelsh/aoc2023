@@ -1,6 +1,10 @@
 module Utils.Maze (
   Point,
   Maze,
+  north,
+  south,
+  east,
+  west,
   mazeFromList,
   height,
   width,
