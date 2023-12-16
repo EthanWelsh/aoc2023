@@ -4,7 +4,6 @@ import Control.Monad (void)
 import ParserUtils (Parser, integer)
 import Text.Megaparsec
 import Text.Megaparsec.Char
-import Text.Megaparsec.Char (string, char, newline, space)
 import Data.List (sort, group, sortBy)
 import Data.Char (intToDigit)
 
@@ -70,6 +69,9 @@ kinds (Hand cards) = rsort $ combineRanks $ rsort $ map toRank valAndCount
     toRank (v, 3) = ThreeKind v
     toRank (v, 4) = FourKind v
     toRank (v, 5) = FiveKind v
+    toRank (v, c) = error $ concat [ "error on call to toRank(v="
+                                   , show v, ", c=", show c
+                                   , ") c should be one of {5, 4, 3, ...}"]
 
 combineRanks :: [Rank] -> [Rank]
 combineRanks (OnePair x : OnePair y : xs) = (TwoPair x y) : xs

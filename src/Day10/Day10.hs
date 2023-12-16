@@ -1,9 +1,8 @@
 module Day10.Day10 (solve) where
 
-import Control.Monad (void)
-import ParserUtils (Parser, integer, charInRange)
+import ParserUtils (Parser)
 import Text.Megaparsec
-import Text.Megaparsec.Char (string, char, newline)
+import Text.Megaparsec.Char (char, newline)
 import Utils.Maze
 
 -- .....
@@ -25,32 +24,32 @@ data Tile = Start | Vertical | Horizontal | Ground | NE | NW | SW | SE
 type Input = Maze Tile
 
 instance Show Tile where
-  show Start = "|"
-  show Vertical = "-"
+  show Start = "S"
+  show Vertical = "|"
+  show Horizontal = "-"
+  show Ground = "."
   show NE = "L"
   show NW = "J"
   show SW = "7"
   show SE = "F"
-  show Ground = "."
-  show Start = "S"
 
 parseTile :: Parser Tile
-parseTile = choice [ Start <$ char '|'
-                   , Vertical <$ char '-'
+parseTile = choice [ Start <$ char 'S'
+                   , Vertical <$ char '|'
+                   , Horizontal <$ char '-'
+                   , Ground <$ char '.'
                    , NE <$ char 'L'
                    , NW <$ char 'J'
                    , SW <$ char '7'
-                   , SE <$ char 'F'
-                   , Ground <$ char '.'
-                   , Start <$ char 'S']
+                   , SE <$ char 'F']
 
 parseLine :: Parser [Tile]
 parseLine = many parseTile
 
 parseInput :: Parser Input
 parseInput = do
-  lines <- parseLine `sepBy` newline
-  return $ mazeFromList lines
+  ls <- parseLine `sepBy` newline
+  return $ mazeFromList ls
 
 part1 :: Input -> IO ()
 part1 input = do
@@ -61,6 +60,7 @@ part1 input = do
 part2 :: Input -> IO ()
 part2 input = do
   putStr "Part 2: "
+  print input
 
 solve :: FilePath -> IO ()
 solve filePath = do

@@ -1,12 +1,10 @@
 module Day08.Day08 (solve) where
 
 import Control.Monad (void)
-import ParserUtils (Parser, integer, charInRange)
+import ParserUtils (Parser, charInRange)
 import Text.Megaparsec
 import Text.Megaparsec.Char (string, char, newline)
 import qualified Data.HashMap as HM
-import Data.Maybe (fromJust)
-import Data.List (findIndex)
 
 data Direction = L | R deriving  (Show, Eq)
 type Room = String
@@ -33,8 +31,8 @@ parseInput :: Parser Input
 parseInput = do
   dirs <- manyTill directionParser newline
   void $ newline
-  lines <- lineParser `sepBy` newline
-  let m = HM.fromList lines
+  ls <- lineParser `sepBy` newline
+  let m = HM.fromList ls
   return $ (Input dirs m)
 
 step :: Maze -> Direction -> Room -> Room
@@ -42,6 +40,7 @@ step m L r = fst (m HM.! r)
 step m R r = snd (m HM.! r)
 
 stepsToEnd :: Maze -> (Room -> Bool) -> [Direction] -> Room -> Int
+stepsToEnd _ _ [] _ = error "Directions should be infinite"
 stepsToEnd m isEnd (d:ds) r = if isEnd r then 0 else 1 + remainingSteps
   where
     remainingSteps = stepsToEnd m isEnd ds (step m d r)

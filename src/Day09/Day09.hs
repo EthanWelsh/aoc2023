@@ -1,9 +1,7 @@
 module Day09.Day09 (solve) where
 
-import Control.Monad (void)
-import ParserUtils (Parser, integer, charInRange)
+import ParserUtils (Parser)
 import Text.Megaparsec
-import Text.Megaparsec.Char (string, char, newline)
 
 type Input = String
 
@@ -18,6 +16,7 @@ part1 input = do
 part2 :: Input -> IO ()
 part2 input = do
   putStr "Part 2: "
+  print input
 
 solve :: FilePath -> IO ()
 solve filePath = do
