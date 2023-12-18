@@ -4,24 +4,14 @@ import ParserUtils (Parser)
 import Text.Megaparsec
 import Text.Megaparsec.Char (char, newline)
 import Utils.Maze
+import Data.Maybe (fromJust)
+import Data.List (findIndex, (\\))
+import qualified Control.Monad as M
 
--- .....
--- .S-7.
--- .|.|.
--- .L-J.
--- .....
-
--- | is a vertical pipe connecting north and south.
---- is a horizontal pipe connecting east and west.
---L is a 90-degree bend connecting north and east.
---J is a 90-degree bend connecting north and west.
---7 is a 90-degree bend connecting south and west.
---F is a 90-degree bend connecting south and east.
--- . is ground; there is no pipe in this tile.
---S is the starting position of the animal; there is a pipe on this tile, but your sketch doesn't show what shape the pipe has.
-
-data Tile = Start | Vertical | Horizontal | Ground | NE | NW | SW | SE
-type Input = Maze Tile
+data Tile = Start | Vertical | Horizontal | Ground | NE | NW | SW | SE deriving (Eq)
+data Direction = North | South | East | West deriving (Show, Eq)
+type Board = Maze Tile
+type Input = Board
 
 instance Show Tile where
   show Start = "S"
@@ -51,16 +41,90 @@ parseInput = do
   ls <- parseLine `sepBy` newline
   return $ mazeFromList ls
 
+movePoint :: Point -> Direction -> Point
+movePoint p North = north p
+movePoint p East = east p
+movePoint p South = south p
+movePoint p West = west p
+
+goesToDirs :: Tile -> [Direction]
+goesToDirs Vertical = [North, South]
+goesToDirs Horizontal = [East, West]
+goesToDirs NE = [North, East]
+goesToDirs NW = [North, West]
+goesToDirs SW = [South, West]
+goesToDirs SE = [South, East]
+goesToDirs t = error $ "dirsAllowed: Unsupported tile=" ++ show t
+
+acceptsFromDirs :: Tile -> [Direction]
+acceptsFromDirs Vertical = [North, South]
+acceptsFromDirs Horizontal = [East, West]
+acceptsFromDirs NE = [South, West]
+acceptsFromDirs NW = [South, East]
+acceptsFromDirs SW = [North, East]
+acceptsFromDirs SE = [North, West]
+acceptsFromDirs Ground = []
+acceptsFromDirs t = error $ "acceptsFrom: Unsupported tile=" ++ show t
+
+isAllowed :: Board -> Point -> Direction -> Bool
+isAllowed b p d = (inBounds b newPoint) && d `elem` (goesToDirs oldTile) && d `elem` (acceptsFromDirs newTile)
+  where
+    oldTile = getPoint b p
+    newPoint = movePoint p d
+    newTile = getPoint b newPoint
+
+identifyStartTile :: Board -> Point -> Tile
+identifyStartTile b p
+  |  onlyAllows [North, South] = Vertical
+  |  onlyAllows [East, West] = Horizontal
+  |  onlyAllows [North, East] = NE
+  |  onlyAllows [North, West] = NW
+  |  onlyAllows [South, West] = SW
+  |  onlyAllows [South, East] = SE
+  |  otherwise = error "Couldn't figure out starting tile"
+  where
+    onlyAllows dirs = doesAllow dirs && doesNotAllowOther dirs
+    doesAllow dirs = all (\d -> d `elem` (acceptsFromDirs (getPoint b (movePoint p d)))) dirs
+    otherDirs dirs = [North, South, East, West] \\ dirs
+    doesNotAllowOther dirs = not $ doesAllow (otherDirs dirs)
+
+step :: Board -> Point -> [Point]
+step b p = let
+  allowedDirs = filter (isAllowed b p) [North, East, South, West]
+  in map (movePoint p) allowedDirs
+
+longPaths :: Board -> [Point] -> Point -> IO ([[Point]])
+longPaths board visited point = do
+    let steps = step board point
+    let filteredSteps = filter (not . (`elem` visited)) steps
+    let noMoreSteps = null filteredSteps
+    let newVisited = point : visited
+    paths <- M.mapM (longPaths board newVisited) filteredSteps
+    let ret = if noMoreSteps then [visited] else concat paths
+    return ret
+
+furthestPointInLoop :: Board -> Point -> IO (Int)
+furthestPointInLoop b p = do
+  paths <- longPaths b [] p
+  let path1 = (tail . reverse) $ paths !! 0
+  let path2 = (tail . reverse) $ paths !! 1
+  let zipped = findIndex (==True) $ zipWith (==) path1 path2
+  let ret = fromJust zipped
+  return $ ret + 1
+
 part1 :: Input -> IO ()
-part1 input = do
+part1 board = do
   putStr $ "Part 1: "
-  putStrLn ""
-  print input
+  let startPoint = head $ findPoints board (== Start)
+  let startTile = identifyStartTile board startPoint
+  let m = setPoint board startPoint startTile
+  d <- furthestPointInLoop m startPoint
+  print d
 
 part2 :: Input -> IO ()
-part2 input = do
+part2 board = do
   putStr "Part 2: "
-  print input
+  putStrLn ""
 
 solve :: FilePath -> IO ()
 solve filePath = do
