@@ -5,7 +5,7 @@ import Text.Megaparsec
 import Text.Megaparsec.Char (char, newline)
 import Utils.Maze
 import Data.Maybe (fromJust)
-import Data.List (elemIndex, (\\))
+import Data.List (sort, nub, elemIndex, groupBy, (\\))
 
 data Tile = Start | Vertical | Horizontal | Ground | NE | NW | SW | SE deriving (Eq)
 data Direction = North | South | East | West deriving (Show, Eq)
@@ -83,7 +83,7 @@ identifyStartTile b p
   |  otherwise = error "Couldn't figure out starting tile"
   where
     onlyAllows dirs = doesAllow dirs && doesNotAllowOther dirs
-    doesAllow = all (\d -> d `elem` acceptsFromDirs (getPoint b (movePoint p d)))
+    doesAllow = all (\d -> inBounds b (movePoint p d) && d `elem` acceptsFromDirs (getPoint b (movePoint p d)))
     otherDirs dirs = [North, South, East, West] \\ dirs
     doesNotAllowOther dirs = not $ doesAllow (otherDirs dirs)
 
@@ -118,10 +118,52 @@ part1 board = do
   let d = furthestPointInLoop m startPoint
   print d
 
+pairs :: Show a => [a] -> [(a, a)]
+pairs [] = []
+pairs [x] = error $ "Expected pairs to be passed a list with an even number of elements but got " ++ (show x)
+pairs (x:y:ys) = (x, y) : (pairs ys)
+
+pointsByRow :: [Point] -> [[Point]]
+pointsByRow ps = groupBy (\(r1, _) (r2, _) -> r1 == r2) (sort ps)
+
+pointsWithinLoop :: [Point] -> [Point]
+pointsWithinLoop ps = concatMap pointsInRowWithinLoop (pointsByRow ps)
+
+pointsInRowWithinLoop :: [Point] -> [Point]
+pointsInRowWithinLoop ps = let
+  r = fst (head ps)
+  cs = map snd ps
+  withoutRunsCols = removeMonotonicRuns cs
+  withoutRunsPoints = map (r,) withoutRunsCols
+  pointsBetweenPair ((_, c1), (_, c2)) = [(r, c) | c <- [c1..c2]]
+  in concatMap pointsBetweenPair (pairs withoutRunsPoints)
+
+countMonotonicRun :: [Int] -> Int
+countMonotonicRun [] = 0
+countMonotonicRun xs = helper (tail xs) (head xs)
+  where
+    helper [] _ = 0
+    helper (y:ys) prev = if y == prev + 1
+                         then 1 + helper ys y
+                         else 0
+
+removeMonotonicRuns :: [Int] -> [Int]
+removeMonotonicRuns [] = []
+removeMonotonicRuns (x:xs) = let
+  toSkip = countMonotonicRun (x:xs) - 1
+  withSkip = drop toSkip xs
+  in x : removeMonotonicRuns withSkip
+
 part2 :: Input -> IO ()
 part2 board = do
   putStr "Part 2: "
-  putStrLn ""
+  let startPoint = head $ findPoints board (== Start)
+  let startTile = identifyStartTile board startPoint
+  let m = setPoint board startPoint startTile
+  let perimeterPoints = (sort . nub . concat) $ longPaths m [] startPoint
+  let pointsInLoop = pointsWithinLoop perimeterPoints
+  let groundPoints = filter (testPoint board (==Ground)) pointsInLoop
+  print $ length groundPoints
 
 solve :: FilePath -> IO ()
 solve filePath = do
