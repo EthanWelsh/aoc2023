@@ -5,8 +5,7 @@ import Text.Megaparsec
 import Text.Megaparsec.Char (char, newline)
 import Utils.Maze
 import Data.Maybe (fromJust)
-import Data.List (findIndex, (\\))
-import qualified Control.Monad as M
+import Data.List (elemIndex, (\\))
 
 data Tile = Start | Vertical | Horizontal | Ground | NE | NW | SW | SE deriving (Eq)
 data Direction = North | South | East | West deriving (Show, Eq)
@@ -67,7 +66,7 @@ acceptsFromDirs Ground = []
 acceptsFromDirs t = error $ "acceptsFrom: Unsupported tile=" ++ show t
 
 isAllowed :: Board -> Point -> Direction -> Bool
-isAllowed b p d = (inBounds b newPoint) && d `elem` (goesToDirs oldTile) && d `elem` (acceptsFromDirs newTile)
+isAllowed b p d = inBounds b newPoint && d `elem` goesToDirs oldTile && d `elem` (acceptsFromDirs newTile)
   where
     oldTile = getPoint b p
     newPoint = movePoint p d
@@ -84,7 +83,7 @@ identifyStartTile b p
   |  otherwise = error "Couldn't figure out starting tile"
   where
     onlyAllows dirs = doesAllow dirs && doesNotAllowOther dirs
-    doesAllow dirs = all (\d -> d `elem` (acceptsFromDirs (getPoint b (movePoint p d)))) dirs
+    doesAllow = all (\d -> d `elem` acceptsFromDirs (getPoint b (movePoint p d)))
     otherDirs dirs = [North, South, East, West] \\ dirs
     doesNotAllowOther dirs = not $ doesAllow (otherDirs dirs)
 
@@ -93,32 +92,30 @@ step b p = let
   allowedDirs = filter (isAllowed b p) [North, East, South, West]
   in map (movePoint p) allowedDirs
 
-longPaths :: Board -> [Point] -> Point -> IO ([[Point]])
-longPaths board visited point = do
-    let steps = step board point
-    let filteredSteps = filter (not . (`elem` visited)) steps
-    let noMoreSteps = null filteredSteps
-    let newVisited = point : visited
-    paths <- M.mapM (longPaths board newVisited) filteredSteps
-    let ret = if noMoreSteps then [visited] else concat paths
-    return ret
+longPaths :: Board -> [Point] -> Point -> [[Point]]
+longPaths board visited point = let
+    steps = step board point
+    filteredSteps = filter (not . (`elem` visited)) steps
+    noMoreSteps = null filteredSteps
+    newVisited = point : visited
+    paths = map (longPaths board newVisited) filteredSteps
+    in if noMoreSteps then [visited] else concat paths
 
-furthestPointInLoop :: Board -> Point -> IO (Int)
-furthestPointInLoop b p = do
-  paths <- longPaths b [] p
-  let path1 = (tail . reverse) $ paths !! 0
-  let path2 = (tail . reverse) $ paths !! 1
-  let zipped = findIndex (==True) $ zipWith (==) path1 path2
-  let ret = fromJust zipped
-  return $ ret + 1
+furthestPointInLoop :: Board -> Point -> Int
+furthestPointInLoop b p = let
+  paths = longPaths b [] p
+  path1 = (tail . reverse) $ paths !! 0
+  path2 = (tail . reverse) $ paths !! 1
+  matchIndex = fromJust $ elemIndex True $ zipWith (==) path1 path2
+  in 1 + matchIndex
 
 part1 :: Input -> IO ()
 part1 board = do
-  putStr $ "Part 1: "
+  putStr "Part 1: "
   let startPoint = head $ findPoints board (== Start)
   let startTile = identifyStartTile board startPoint
   let m = setPoint board startPoint startTile
-  d <- furthestPointInLoop m startPoint
+  let d = furthestPointInLoop m startPoint
   print d
 
 part2 :: Input -> IO ()
