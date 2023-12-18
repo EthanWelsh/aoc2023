@@ -55,10 +55,10 @@ northWest :: Point -> Point
 northWest = north . west
 
 height :: Maze a -> Int
-height (Maze m) = length $ m
+height (Maze m) = length m
 
 width :: Maze a -> Int
-width (Maze m) = length $ m !! 0
+width (Maze m) = length $ head m
 
 getPoint :: Maze a -> Point -> a
 getPoint (Maze m) (r, c) = (m !! r) !! c
@@ -70,7 +70,7 @@ replacePoint g (r, c) v = let
   in (element r .~ newRow) g
 
 setPoint :: Maze a -> Point -> a -> Maze a
-setPoint (Maze m) p v = (Maze (replacePoint m p v))
+setPoint (Maze m) p v = Maze (replacePoint m p v)
 
 testPoint :: Maze a -> (a -> Bool) -> Point -> Bool
 testPoint m f p = f (getPoint m p)
@@ -79,7 +79,7 @@ findPoints :: Maze a -> (a -> Bool) -> [Point]
 findPoints m f = filter (testPoint m f) (allPoints m)
 
 inBounds :: Maze a -> Point -> Bool
-inBounds m (r, c) = r >= 0 && r < (height m) && c >= 0 && c < (width m)
+inBounds m (r, c) = r >= 0 && r < height m && c >= 0 && c < width m
 
 neighbors4 :: Maze a -> Point -> [Point]
 neighbors4 m p = filter (inBounds m) $ map ($ p) dirs
