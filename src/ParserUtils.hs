@@ -15,11 +15,12 @@ module ParserUtils (
 )
 where
 
-import Data.Void (Void)
-import Text.Megaparsec (Parsec, between, empty, many, satisfy)
-import Text.Megaparsec.Char (space1, string)
+import           Control.Monad              (void)
+import           Data.Void                  (Void)
+import           Text.Megaparsec            (Parsec, between, empty, many,
+                                             satisfy)
+import           Text.Megaparsec.Char       (space1, string)
 import qualified Text.Megaparsec.Char.Lexer as L
-import Control.Monad (void)
 
 type Parser = Parsec Void String
 

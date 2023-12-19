@@ -1,12 +1,12 @@
 module Day15.Day15 (solve) where
 
-import Control.Lens
-import Control.Monad (void)
-import Data.Char
-import Data.List (findIndices)
-import ParserUtils (Parser, integer)
-import Text.Megaparsec
-import Text.Megaparsec.Char (alphaNumChar, char, newline, string)
+import           Control.Lens
+import           Control.Monad        (void)
+import           Data.Char
+import           Data.List            (findIndices)
+import           ParserUtils          (Parser, integer)
+import           Text.Megaparsec
+import           Text.Megaparsec.Char (alphaNumChar, char, newline, string)
 
 data Instruction = Add String Int | Remove String deriving (Show)
 
@@ -61,7 +61,7 @@ removeFromBox :: Box -> String -> Box
 removeFromBox b l = filter (\(x, _) -> x /= l) b
 
 labelFromInstruction :: Instruction -> Int
-labelFromInstruction (Add l _) = hash l
+labelFromInstruction (Add l _)  = hash l
 labelFromInstruction (Remove l) = hash l
 
 followInstruction :: BoxMap -> Instruction -> BoxMap
@@ -69,7 +69,7 @@ followInstruction bs instruction =
   let i = labelFromInstruction instruction
       oldBox = bs !! i
    in case instruction of
-        (Add label v) -> setBox bs i (addToBox oldBox label v)
+        (Add label v)  -> setBox bs i (addToBox oldBox label v)
         (Remove label) -> setBox bs i (removeFromBox oldBox label)
 
 followInstructions :: [Instruction] -> BoxMap

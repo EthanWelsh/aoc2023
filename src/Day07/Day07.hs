@@ -1,16 +1,16 @@
 module Day07.Day07 (solve) where
 
-import Control.Monad (void)
-import ParserUtils (Parser, integer)
-import Text.Megaparsec
-import Text.Megaparsec.Char
-import Data.List (sort, group, sortBy)
-import Data.Char (intToDigit)
+import           Control.Monad        (void)
+import           Data.Char            (intToDigit)
+import           Data.List            (group, sort, sortBy)
+import           ParserUtils          (Parser, integer)
+import           Text.Megaparsec
+import           Text.Megaparsec.Char
 
 type Card = Int
 data Hand = Hand [Card] deriving (Eq)
 data Game = Game { hand :: Hand
-                 , bid :: Int } deriving (Show, Eq)
+                 , bid  :: Int } deriving (Show, Eq)
 type Input = [Game]
 
 data Rank = HighCard Int | OnePair Int | TwoPair Int Int |
@@ -41,13 +41,13 @@ rsort :: Ord a => [a] -> [a]
 rsort = reverse . sort
 
 eraseInt :: Rank -> Rank
-eraseInt (HighCard _) = (HighCard 2)
-eraseInt (OnePair _) = (OnePair 2)
-eraseInt (TwoPair _ _) = (TwoPair 2 2)
-eraseInt (ThreeKind _) = (ThreeKind 2)
-eraseInt (FullHouse _ _) = (FullHouse 2 2)
-eraseInt (FourKind _) = (FourKind 2)
-eraseInt (FiveKind _) = (FiveKind 2)
+eraseInt (HighCard _)    = HighCard 2
+eraseInt (OnePair _)     = OnePair 2
+eraseInt (TwoPair _ _)   = TwoPair 2 2
+eraseInt (ThreeKind _)   = ThreeKind 2
+eraseInt (FullHouse _ _) = FullHouse 2 2
+eraseInt (FourKind _)    = FourKind 2
+eraseInt (FiveKind _)    = FiveKind 2
 
 toLetter :: Int -> Char
 toLetter x
@@ -57,13 +57,13 @@ toLetter x
   | x == 12 = 'Q'
   | x == 13 = 'K'
   | x == 14 = 'A'
-  | otherwise = error $ concat $ ["toLetter can't be called on l=", show x]
+  | otherwise = error $ concat ["toLetter can't be called on l=", show x]
 
 kinds :: Hand -> [Rank]
 kinds (Hand cards) = rsort $ combineRanks $ rsort $ map toRank valAndCount
   where
     groups = (group . sort) cards
-    valAndCount = map (\l -> (l !! 0, length l)) groups
+    valAndCount = map (\l -> (head l, length l)) groups
     toRank (v, 1) = HighCard v
     toRank (v, 2) = OnePair v
     toRank (v, 3) = ThreeKind v
@@ -74,9 +74,9 @@ kinds (Hand cards) = rsort $ combineRanks $ rsort $ map toRank valAndCount
                                    , ") c should be one of {5, 4, 3, ...}"]
 
 combineRanks :: [Rank] -> [Rank]
-combineRanks (OnePair x : OnePair y : xs) = (TwoPair x y) : xs
-combineRanks (ThreeKind x : OnePair y : xs) = (FullHouse x y) : xs
-combineRanks xs = xs
+combineRanks (OnePair x : OnePair y : xs)   = TwoPair x y : xs
+combineRanks (ThreeKind x : OnePair y : xs) = FullHouse x y : xs
+combineRanks xs                             = xs
 
 calculateScore :: Input -> (Hand -> Hand -> Ordering) -> Int
 calculateScore input f = let
@@ -93,29 +93,29 @@ comparePt1 a@(Hand aa) b@(Hand bb) = let
 
 part1 :: Input -> IO ()
 part1 input = do
-  putStr $ "Part 1: "
+  putStr "Part 1: "
   print $ calculateScore input comparePt1
 
 upgradeRank :: Int -> Rank -> Rank
 upgradeRank 0 r = r
-upgradeRank _ (HighCard 11)    = (HighCard 11)
-upgradeRank 1 (HighCard x)     = (OnePair x)
-upgradeRank 2 (HighCard x)     = (ThreeKind x)
-upgradeRank 3 (HighCard x)     = (FourKind x)
-upgradeRank 4 (HighCard x)     = (FiveKind x)
-upgradeRank 2 (OnePair 11)     = (OnePair 11)
-upgradeRank 1 (OnePair x)      = (ThreeKind x)
-upgradeRank 2 (TwoPair 11 y)   = (FourKind y)
-upgradeRank 2 (TwoPair x 11)   = (FourKind x)
-upgradeRank 1 (TwoPair x y)    = (FullHouse x y)
-upgradeRank 3 (FullHouse 11 y) = (FiveKind y)
-upgradeRank 2 (FullHouse x 11) = (FiveKind x)
-upgradeRank 3 (ThreeKind 11)   = (ThreeKind 11)
-upgradeRank 1 (ThreeKind x)    = (FourKind x)
-upgradeRank 4 (FourKind 11)    = (FiveKind 0)
-upgradeRank 1 (FourKind x)     = (FiveKind x)
-upgradeRank _ (FiveKind 11)    = (FiveKind 11)
-upgradeRank c r = error $ concat $ ["Couldn't updgrade rank=(", show r, ") jackCount=", show c]
+upgradeRank _ (HighCard 11)    = HighCard 11
+upgradeRank 1 (HighCard x)     = OnePair x
+upgradeRank 2 (HighCard x)     = ThreeKind x
+upgradeRank 3 (HighCard x)     = FourKind x
+upgradeRank 4 (HighCard x)     = FiveKind x
+upgradeRank 2 (OnePair 11)     = OnePair 11
+upgradeRank 1 (OnePair x)      = ThreeKind x
+upgradeRank 2 (TwoPair 11 y)   = FourKind y
+upgradeRank 2 (TwoPair x 11)   = FourKind x
+upgradeRank 1 (TwoPair x y)    = FullHouse x y
+upgradeRank 3 (FullHouse 11 y) = FiveKind y
+upgradeRank 2 (FullHouse x 11) = FiveKind x
+upgradeRank 3 (ThreeKind 11)   = ThreeKind 11
+upgradeRank 1 (ThreeKind x)    = FourKind x
+upgradeRank 4 (FourKind 11)    = FiveKind 0
+upgradeRank 1 (FourKind x)     = FiveKind x
+upgradeRank _ (FiveKind 11)    = FiveKind 11
+upgradeRank c r = error $ concat ["Couldn't updgrade rank=(", show r, ") jackCount=", show c]
 
 jacksCount :: Hand -> Int
 jacksCount (Hand cs) = length $ filter (==11) cs

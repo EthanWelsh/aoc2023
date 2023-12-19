@@ -10,7 +10,7 @@ parseInput = error "TODO"
 
 part1 :: Input -> IO ()
 part1 input = do
-  putStr $ "Part 1: "
+  putStr "Part 1: "
   print input
 
 part2 :: Input -> IO ()

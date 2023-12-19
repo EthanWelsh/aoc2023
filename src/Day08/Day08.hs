@@ -1,10 +1,10 @@
 module Day08.Day08 (solve) where
 
-import Control.Monad (void)
-import ParserUtils (Parser, charInRange)
-import Text.Megaparsec
-import Text.Megaparsec.Char (string, char, newline)
-import qualified Data.HashMap as HM
+import           Control.Monad        (void)
+import qualified Data.HashMap         as HM
+import           ParserUtils          (Parser, charInRange)
+import           Text.Megaparsec
+import           Text.Megaparsec.Char (char, newline, string)
 
 data Direction = L | R deriving  (Show, Eq)
 type Room = String
@@ -33,7 +33,7 @@ parseInput = do
   void $ newline
   ls <- lineParser `sepBy` newline
   let m = HM.fromList ls
-  return $ (Input dirs m)
+  return (Input dirs m)
 
 step :: Maze -> Direction -> Room -> Room
 step m L r = fst (m HM.! r)
@@ -47,7 +47,7 @@ stepsToEnd m isEnd (d:ds) r = if isEnd r then 0 else 1 + remainingSteps
 
 part1 :: Input -> IO ()
 part1 input = do
-  putStr $ "Part 1: "
+  putStr "Part 1: "
   let ds = (concat . repeat) $ dirs input :: [Direction]
   let m = maze input
   print $ stepsToEnd m (=="ZZZ") ds "AAA"

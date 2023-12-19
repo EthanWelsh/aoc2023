@@ -1,19 +1,19 @@
 module Day03.Day03 (solve) where
 
-import Data.Char (isDigit)
-import Data.List (nub)
-import Utils.Maze
+import           Data.Char  (isDigit)
+import           Data.List  (nub)
+import           Utils.Maze
 
 type Board = Maze Char
 
 isSymbol :: Char -> Bool
-isSymbol c = not (isDigit c) && not (c == '.')
+isSymbol c = not (isDigit c) && (c /= '.')
 
 hasAdjacentSymbol :: Board -> Point -> Bool
 hasAdjacentSymbol board point =
   let ns = neighbors8 board point
       cs = map (getPoint board) ns
-   in any (isSymbol) cs
+   in any isSymbol cs
 
 findLeftStart :: Board -> Point -> Point
 findLeftStart board point = if isPointStart then point else findLeftStart board l
@@ -42,9 +42,9 @@ getNumbersAroundPoint board point =
    in map (getNumberFromOrigin board) origins
 
 gearRatio :: Board -> Point -> Int
-gearRatio board point = case (getNumbersAroundPoint board point) of
+gearRatio board point = case getNumbersAroundPoint board point of
   [a, b] -> a * b
-  _ -> 0
+  _      -> 0
 
 solve :: FilePath -> IO ()
 solve filePath = do
@@ -59,10 +59,10 @@ part1 board = do
   let nextToSymbols = filter (hasAdjacentSymbol board) digitPoints
   let origins = nub $ map (findLeftStart board) nextToSymbols
   let nums = map (getNumberFromOrigin board) origins
-  putStrLn $ "Part 1:" ++ (show (sum nums))
+  putStrLn $ "Part 1:" ++ show (sum nums)
 
 part2 :: Board -> IO ()
 part2 board = do
   let gearPoints = filter (testPoint board (== '*')) (allPoints board)
   let gearRatios = map (gearRatio board) gearPoints
-  putStrLn $ "Part 2:" ++ (show (sum gearRatios))
+  putStrLn $ "Part 2:" ++ show (sum gearRatios)

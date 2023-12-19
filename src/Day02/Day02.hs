@@ -1,8 +1,8 @@
 module Day02.Day02 (solve) where
 
-import ParserUtils (Parser, integer)
-import Text.Megaparsec
-import Text.Megaparsec.Char (newline, string)
+import           ParserUtils          (Parser, integer)
+import           Text.Megaparsec
+import           Text.Megaparsec.Char (newline, string)
 
 -- Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green
 
@@ -18,20 +18,20 @@ number = do
 rgbParser :: Parser RGB
 rgbParser = do
   n <- number
-  color <- (string "red" <|> string "green" <|> string "blue")
+  color <- string "red" <|> string "green" <|> string "blue"
   case color of
-    "red" -> return (n, 0, 0)
+    "red"   -> return (n, 0, 0)
     "green" -> return (0, n, 0)
-    "blue" -> return (0, 0, n)
-    _ -> error "unexpected color"
+    "blue"  -> return (0, 0, n)
+    _       -> error "unexpected color"
 
 roundParser :: Parser RGB
 roundParser = do
-  uncollapsed <- rgbParser `sepBy` (string ", ")
+  uncollapsed <- rgbParser `sepBy` string ", "
   return $ addRounds uncollapsed
 
 roundsParser :: Parser [RGB]
-roundsParser = roundParser `sepBy` (string "; ")
+roundsParser = roundParser `sepBy` string "; "
 
 gameParser :: Parser Game
 gameParser = do
@@ -48,12 +48,12 @@ inputParser = do
   return games
 
 addRounds :: [RGB] -> RGB
-addRounds rounds = foldl addRound (0, 0, 0) rounds
+addRounds = foldl addRound (0, 0, 0)
   where
     addRound (a1, a2, a3) (b1, b2, b3) = (a1 + b1, a2 + b2, a3 + b3)
 
 maxRounds :: [RGB] -> RGB
-maxRounds rounds = foldl maxRound (0, 0, 0) rounds
+maxRounds = foldl maxRound (0, 0, 0)
   where
     maxRound (a1, a2, a3) (b1, b2, b3) = (max a1 b1, max a2 b2, max a3 b3)
 
@@ -63,7 +63,7 @@ gameIsPossible (G _ rounds) =
    in r <= 12 && g <= 13 && b <= 14
 
 sumOfGameIds :: [Game] -> Int
-sumOfGameIds games = foldl addGameId 0 games
+sumOfGameIds = foldl addGameId 0
   where
     addGameId a (G b _) = a + b
 
@@ -90,6 +90,3 @@ solve filePath = do
           Right records -> do
               part1 records
               part2 records
-  --putStrLn "hello"
-  --part1 contents
-  --part2 contents

@@ -1,7 +1,7 @@
 module Day18.Day18 (solve) where
 
-import Text.Megaparsec
-import ParserUtils (Parser)
+import           ParserUtils     (Parser)
+import           Text.Megaparsec
 --import Control.Monad (void)
 --import Text.Megaparsec.Char (string, char, newline)
 
@@ -12,7 +12,7 @@ parseInput = error "TODO"
 
 part1 :: Input -> IO ()
 part1 input = do
-  putStr $ "Part 1: "
+  putStr "Part 1: "
   print input
 
 part2 :: Input -> IO ()

@@ -1,11 +1,11 @@
 module Day10.Day10 (solve) where
 
-import ParserUtils (Parser)
-import Text.Megaparsec
-import Text.Megaparsec.Char (char, newline)
-import Utils.Maze
-import Data.Maybe (fromJust)
-import Data.List (sort, nub, elemIndex, groupBy, (\\))
+import           Data.List            (elemIndex, groupBy, nub, sort, (\\))
+import           Data.Maybe           (fromJust)
+import           ParserUtils          (Parser)
+import           Text.Megaparsec
+import           Text.Megaparsec.Char (char, newline)
+import           Utils.Maze
 
 data Tile = Start | Vertical | Horizontal | Ground | NE | NW | SW | SE deriving (Eq)
 data Direction = North | South | East | West deriving (Show, Eq)
@@ -13,14 +13,14 @@ type Board = Maze Tile
 type Input = Board
 
 instance Show Tile where
-  show Start = "S"
-  show Vertical = "|"
+  show Start      = "S"
+  show Vertical   = "|"
   show Horizontal = "-"
-  show Ground = "."
-  show NE = "L"
-  show NW = "J"
-  show SW = "7"
-  show SE = "F"
+  show Ground     = "."
+  show NE         = "L"
+  show NW         = "J"
+  show SW         = "7"
+  show SE         = "F"
 
 parseTile :: Parser Tile
 parseTile = choice [ Start <$ char 'S'
@@ -42,28 +42,28 @@ parseInput = do
 
 movePoint :: Point -> Direction -> Point
 movePoint p North = north p
-movePoint p East = east p
+movePoint p East  = east p
 movePoint p South = south p
-movePoint p West = west p
+movePoint p West  = west p
 
 goesToDirs :: Tile -> [Direction]
-goesToDirs Vertical = [North, South]
+goesToDirs Vertical   = [North, South]
 goesToDirs Horizontal = [East, West]
-goesToDirs NE = [North, East]
-goesToDirs NW = [North, West]
-goesToDirs SW = [South, West]
-goesToDirs SE = [South, East]
-goesToDirs t = error $ "dirsAllowed: Unsupported tile=" ++ show t
+goesToDirs NE         = [North, East]
+goesToDirs NW         = [North, West]
+goesToDirs SW         = [South, West]
+goesToDirs SE         = [South, East]
+goesToDirs t          = error $ "dirsAllowed: Unsupported tile=" ++ show t
 
 acceptsFromDirs :: Tile -> [Direction]
-acceptsFromDirs Vertical = [North, South]
+acceptsFromDirs Vertical   = [North, South]
 acceptsFromDirs Horizontal = [East, West]
-acceptsFromDirs NE = [South, West]
-acceptsFromDirs NW = [South, East]
-acceptsFromDirs SW = [North, East]
-acceptsFromDirs SE = [North, West]
-acceptsFromDirs Ground = []
-acceptsFromDirs t = error $ "acceptsFrom: Unsupported tile=" ++ show t
+acceptsFromDirs NE         = [South, West]
+acceptsFromDirs NW         = [South, East]
+acceptsFromDirs SW         = [North, East]
+acceptsFromDirs SE         = [North, West]
+acceptsFromDirs Ground     = []
+acceptsFromDirs t          = error $ "acceptsFrom: Unsupported tile=" ++ show t
 
 isAllowed :: Board -> Point -> Direction -> Bool
 isAllowed b p d = inBounds b newPoint && d `elem` goesToDirs oldTile && d `elem` (acceptsFromDirs newTile)

@@ -1,16 +1,16 @@
 module Day06.Day06 (solve) where
 
-import Control.Monad (void)
-import ParserUtils (Parser, integer, skipSpaces)
-import Text.Megaparsec
-import Text.Megaparsec.Char (string)
+import           Control.Monad        (void)
+import           ParserUtils          (Parser, integer, skipSpaces)
+import           Text.Megaparsec
+import           Text.Megaparsec.Char (string)
 
 type Input = [Race]
-data Race = Race { time :: Int
+data Race = Race { time     :: Int
                  , distance :: Int
                  } deriving (Show, Eq)
 
-data Action = Action { holdTime :: Int
+data Action = Action { holdTime      :: Int
                      , remainingTime :: Int } deriving (Show)
 
 parseInput :: Parser Input
@@ -21,13 +21,13 @@ parseInput = do
   void $ string "Distance:"
   skipSpaces
   distances <- many integer
-  return $ map (\(t, d) -> (Race t d)) (zip times distances)
+  return $ zipWith Race times distances
 
 calculateScore :: Action -> Int
-calculateScore a = (remainingTime a) * (holdTime a)
+calculateScore a = remainingTime a * holdTime a
 
 possibleActions :: Race -> [Action]
-possibleActions race = map (\ht -> (Action ht (rt - ht))) holdTimes
+possibleActions race = map (\ht -> Action ht (rt - ht)) holdTimes
   where
     rt = time race
     holdTimes = [1..rt]
@@ -41,7 +41,7 @@ waysToBeat race = let
 
 part1 :: Input -> IO ()
 part1 input = do
-  putStr $ "Part 1: "
+  putStr "Part 1: "
   print $ product $ map waysToBeat input
 
 combineDigits :: [Int] -> Int

@@ -1,10 +1,10 @@
 module Day04.Day04 (solve) where
 
-import Control.Monad (void)
-import Data.List (intersect)
-import ParserUtils (Parser, colon, integer, lexeme, pipe)
-import Text.Megaparsec
-import Text.Megaparsec.Char (string)
+import           Control.Monad        (void)
+import           Data.List            (intersect)
+import           ParserUtils          (Parser, colon, integer, lexeme, pipe)
+import           Text.Megaparsec
+import           Text.Megaparsec.Char (string)
 
 
 data Card = C Int [Int] [Int] deriving (Show)
@@ -28,7 +28,7 @@ cardParser = do
   return (C n wins haves)
 
 winners :: Card -> [Int]
-winners (C _ wins haves) = intersect wins haves
+winners (C _ wins haves) = wins `intersect` haves
 
 winCount :: Card -> Int
 winCount card = length $ winners card
@@ -45,14 +45,14 @@ cardNumber :: Card -> Int
 cardNumber (C n _ _) = n
 
 countCopies :: [Card] -> Card -> Int
-countCopies cards card = let 
+countCopies cards card = let
   cardNum = cardNumber card
   numberOfWinners = length $ winners card
   firstCopyNum = cardNum + 1
   lastCopyNum = firstCopyNum + numberOfWinners - 1
   winningNums = if numberOfWinners > 0 then [firstCopyNum..lastCopyNum] else []
   minusOne n = n - 1
-  winningCards = map (getCard cards) (map minusOne winningNums)
+  winningCards = map (getCard cards . minusOne) winningNums
   copyCount = sum $ map (countCopies cards) winningCards
   in 1 + copyCount
 
@@ -67,9 +67,9 @@ solve filePath = do
 
 part1 :: [Card] -> IO ()
 part1 cards = do
-  putStrLn $ "Part 1: " ++ (show (sum $ map cardScore cards))
+  putStrLn $ "Part 1: " ++ show (sum $ map cardScore cards)
 
 part2 :: [Card] -> IO ()
 part2 cards = do
-  putStrLn $ "Part 2: " ++ (show (sum $ map (countCopies cards) cards))
-  
+  putStrLn $ "Part 2: " ++ show (sum $ map (countCopies cards) cards)
+

@@ -19,7 +19,7 @@ module Utils.Maze (
   allPointsSatisfying,
 ) where
 
-import Control.Lens
+import           Control.Lens
 
 type Point = (Int, Int)
 data Maze a = Maze [[a]]
@@ -28,7 +28,7 @@ instance Show a => Show (Maze a) where
   show (Maze m) = unlines $ map (concatMap show) m
 
 mazeFromList :: [[a]] -> Maze a
-mazeFromList m = (Maze m)
+mazeFromList m = Maze m
 
 north :: Point -> Point
 north (r, c) = (r - 1, c)
