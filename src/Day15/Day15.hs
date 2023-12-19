@@ -6,7 +6,7 @@ import           Data.Char
 import           Data.List            (findIndices)
 import           ParserUtils          (Parser, integer)
 import           Text.Megaparsec
-import           Text.Megaparsec.Char (alphaNumChar, char, newline, string)
+import           Text.Megaparsec.Char (alphaNumChar, char)
 
 data Instruction = Add String Int | Remove String deriving (Show)
 
