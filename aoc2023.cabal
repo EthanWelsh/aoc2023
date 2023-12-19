@@ -26,6 +26,19 @@ executable aoc2023
                      , data-interval
                      , hashmap
                      , lens
+                     , search-algorithms
+                     , time
+                     , range
+                     , template-haskell
+                     , unordered-containers
+                     , ansi-terminal
+                     , directory
+                     , optparse-applicative
+                     , parser-combinators
+                     , text
+                     , mtl
+                     , vector
+                     , memoize
   ghc-options:         -Wall
                        -Wcompat
                        -Widentities

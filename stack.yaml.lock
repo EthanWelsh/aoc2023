@@ -18,6 +18,13 @@ packages:
       size: 31119
   original:
     hackage: ghc-lib-parser-9.4.8.20231111@sha256:fbbc68e9a30d97321a0cb576d7366b732b98136f4a5e5a9384ed13ff1b00a7db,14591
+- completed:
+    hackage: memoize-1.1.2@sha256:d7701b55ed63434d1e8b507d0a76bb58f2fe31b7ce329132e1ca808c7001da49,1928
+    pantry-tree:
+      sha256: 8c99f1a87a270c8b8fb2238a0a94b346a986cb502753162dab909ed8b2ff44ad
+      size: 687
+  original:
+    hackage: memoize-1.1.2@sha256:d7701b55ed63434d1e8b507d0a76bb58f2fe31b7ce329132e1ca808c7001da49,1928
 snapshots:
 - completed:
     sha256: afd5ba64ab602cabc2d3942d3d7e7dd6311bc626dcb415b901eaf576cb62f0ea

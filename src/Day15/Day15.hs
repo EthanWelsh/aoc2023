@@ -5,7 +5,7 @@ import           Control.Monad        (void)
 import           Data.Char
 import           Data.List            (findIndices)
 import           ParserUtils          (Parser, integer)
-import           Text.Megaparsec
+import           Text.Megaparsec hiding (label)
 import           Text.Megaparsec.Char (alphaNumChar, char)
 
 data Instruction = Add String Int | Remove String deriving (Show)
@@ -42,13 +42,10 @@ part1 input = do
   print $ sum $ map hash input
 
 emptyBoxMap :: BoxMap
-emptyBoxMap = [[] | _ <- [0 .. 256]]
+emptyBoxMap = [[] | _ <- [0 .. 256] :: [Int]]
 
 setBox :: BoxMap -> Int -> Box -> BoxMap
 setBox bs i b = (element i .~ b) bs
-
-containsLabel :: Box -> String -> Bool
-containsLabel b l = any (\(x, _) -> x == l) b
 
 addToBox :: Box -> String -> Int -> Box
 addToBox b l v =
@@ -74,9 +71,6 @@ followInstruction bs instruction =
 
 followInstructions :: [Instruction] -> BoxMap
 followInstructions = foldl followInstruction emptyBoxMap
-
-showBoxMap :: BoxMap -> String
-showBoxMap bm = concat $ zipWith (\b i -> if null b then [] else "\nBox:" ++ show i ++ ": " ++ show b) bm [0 ..]
 
 getFocusPower :: Box -> Int -> Int
 getFocusPower b idx =

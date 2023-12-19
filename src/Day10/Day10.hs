@@ -134,7 +134,7 @@ pointsInRowWithinLoop ps = let
   r = fst (head ps)
   cs = map snd ps
   withoutRunsCols = removeMonotonicRuns cs
-  withoutRunsPoints = map (r,) withoutRunsCols
+  withoutRunsPoints = map (\c -> (r, c)) withoutRunsCols
   pointsBetweenPair ((_, c1), (_, c2)) = [(r, c) | c <- [c1..c2]]
   in concatMap pointsBetweenPair (pairs withoutRunsPoints)
 
