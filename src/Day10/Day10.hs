@@ -8,7 +8,6 @@ import           Text.Megaparsec.Char (char, newline)
 import           Utils.Maze
 
 data Tile = Start | Vertical | Horizontal | Ground | NE | NW | SW | SE deriving (Eq)
-data Direction = North | South | East | West deriving (Show, Eq)
 type Board = Maze Tile
 type Input = Board
 
@@ -39,12 +38,6 @@ parseInput :: Parser Input
 parseInput = do
   ls <- parseLine `sepBy` newline
   return $ mazeFromList ls
-
-movePoint :: Point -> Direction -> Point
-movePoint p North = north p
-movePoint p East  = east p
-movePoint p South = south p
-movePoint p West  = west p
 
 goesToDirs :: Tile -> [Direction]
 goesToDirs Vertical   = [North, South]

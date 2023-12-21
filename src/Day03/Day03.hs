@@ -18,7 +18,7 @@ hasAdjacentSymbol board point =
 findLeftStart :: Board -> Point -> Point
 findLeftStart board point = if isPointStart then point else findLeftStart board l
   where
-    l = west point
+    l = movePoint point West
     isOutOfBounds = not (inBounds board l)
     hasNoMoreDigits = not $ isDigit (getPoint board l)
     isPointStart = isOutOfBounds || hasNoMoreDigits

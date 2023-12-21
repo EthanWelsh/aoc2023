@@ -1,10 +1,8 @@
 module Utils.Maze (
   Point,
   Maze,
-  north,
-  south,
-  east,
-  west,
+  Direction(North, South, East, West),
+  movePoint,
   mazeFromList,
   height,
   width,
@@ -17,12 +15,14 @@ module Utils.Maze (
   neighbors8,
   allPoints,
   allPointsSatisfying,
+  manhattanDistance,
 ) where
 
 import           Control.Lens
 
 type Point = (Int, Int)
-data Maze a = Maze [[a]]
+data Maze a = Maze [[a]] deriving (Eq, Ord)
+data Direction = North | South | East | West deriving (Show, Eq, Ord)
 
 instance Show a => Show (Maze a) where
   show (Maze m) = unlines $ map (concatMap show) m
@@ -53,6 +53,12 @@ southWest = south . west
 
 northWest :: Point -> Point
 northWest = north . west
+
+movePoint :: Point -> Direction -> Point
+movePoint p North = north p
+movePoint p East  = east p
+movePoint p South = south p
+movePoint p West  = west p
 
 height :: Maze a -> Int
 height (Maze m) = length m
@@ -94,3 +100,6 @@ allPoints m = [(r, c) | r <- [0 .. (height m - 1)], c <- [0 .. (width m - 1)]]
 
 allPointsSatisfying :: Maze a -> (Point -> Bool) -> [Point]
 allPointsSatisfying m f = filter f (allPoints m)
+
+manhattanDistance :: Point -> Point -> Int
+manhattanDistance (x1, y1) (x2, y2) = abs (x1 - x2) + abs (y1 - y2)
