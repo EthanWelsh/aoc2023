@@ -1,24 +1,46 @@
 module Day21.Day21 (solve) where
 
-import           ParserUtils     (Parser)
+import           Data.Function.Memoize
+import qualified Data.Set              as Set
+import           ParserUtils           (Parser)
 import           Text.Megaparsec
---import Control.Monad (void)
---import Text.Megaparsec.Char (string, char, newline)
+import           Text.Megaparsec.Char  (char, newline, string)
+import           Utils.Maze
 
-type Input = String
+type Grid = Maze Char
+type Input = Grid
+type Points = Set.Set Point
 
 parseInput :: Parser Input
-parseInput = error "TODO"
+parseInput = do
+  lines <- many (char '.' <|> char '#' <|> char 'S') `sepBy` newline
+  return $ mazeFromList lines
+
+startPoint :: Grid -> Point
+startPoint m = head $ filter (testPoint m (=='S')) (allPoints m)
+
+stepPoint :: Grid -> Point -> Points
+stepPoint maze point = memoize (stepHelper maze) point
+  where
+    stepHelper m p = Set.fromList $ filter (testPoint m (/='#')) (neighbors4 m p)
+
+step :: Grid -> Points -> Points
+step m ps = Set.unions $ Set.map (stepPoint m) ps
 
 part1 :: Input -> IO ()
-part1 input = do
+part1 grid = do
   putStr "Part 1: "
-  print input
+  putStrLn ""
+  let start = startPoint grid
+  let possibilities = iterate (step grid) (Set.singleton start)
+  print $ length $ possibilities !! 64
 
 part2 :: Input -> IO ()
-part2 input = do
+part2 grid = do
   putStr "Part 2: "
-  print input
+  let start = startPoint grid
+  let possibilities = iterate (step grid) (Set.singleton start)
+  print $ length $ possibilities !! 26501365
 
 solve :: FilePath -> IO ()
 solve filePath = do
