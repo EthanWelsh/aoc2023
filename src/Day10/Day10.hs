@@ -1,13 +1,12 @@
 module Day10.Day10 (solve) where
 
-import           Data.List            (elemIndex, groupBy, nub, sort, (\\))
-import           Data.Maybe           (fromJust)
+import           Algorithm.Search
+import           Data.List            (elemIndex, nub, sort, (\\))
+import           Data.Maybe           (fromJust, isJust)
 import           ParserUtils          (Parser)
 import           Text.Megaparsec
 import           Text.Megaparsec.Char (char, newline)
 import           Utils.Maze
-import           Algorithm.Search
-import Data.Maybe (isJust)
 
 data Tile = Start | Vertical | Horizontal | Ground | NE | NW | SW | SE deriving (Eq)
 type Board = Maze Tile
@@ -113,6 +112,11 @@ part1 board = do
   let d = furthestPointInLoop m startPoint
   print d
 
+markObviousNotGroundPoints :: Maze Char -> Maze Char
+markObviousNotGroundPoints m = let
+  ps = notGroundPoints m
+  in setPoints m ps ' '
+
 bigger :: Tile -> [[Char]]
 bigger Vertical =   [ " # "
                     , " # "
@@ -135,12 +139,15 @@ bigger SW         = [ "   "
 bigger SE         = [ "   "
                     , " ##"
                     , " # " ]
+bigger _ = error "Unknown tile passed to bigger."
 
-biggerMaze :: [[Tile]] -> [[Char]]
-biggerMaze = concatMap biggerLine
-  where
-    appendAll = zipWith (++)
-    biggerLine (x:xs) = foldl appendAll (bigger x) (map bigger xs)
+biggerMaze :: Maze Tile -> Maze Char
+biggerMaze m = let
+  appendAll = zipWith (++)
+  biggerLine []     = []
+  biggerLine (x:xs) = foldl appendAll (bigger x) (map bigger xs)
+  biggerM = mazeFromList $ concatMap biggerLine (mazeToList m)
+  in markObviousNotGroundPoints biggerM
 
 distanceFromEdge :: Maze Char -> Point -> Int
 distanceFromEdge m (r, c) = let
@@ -163,16 +170,33 @@ isEnd m p = not (all (inBounds m . movePoint p) [North, East, South, West])
 hasPathToOutside :: Maze Char -> Point -> Bool
 hasPathToOutside m p = isJust $ aStar (neighbors m) (\_ _ -> 1) (distanceFromEdge m) (isEnd m) p
 
-setStartPoint :: Maze Tile -> Maze Tile
-setStartPoint m = let
-  startPoint = head $ findPoints m (== Start)
-  startTile = identifyStartTile m startPoint
-  in setPoint m startPoint startTile
+-- This is a somewhat lazy optimization to remove the large number of ground
+-- tiles that reside totally outside of the loop. This function performs a
+-- scan from all side of the grid, removing all ground points until we reach the
+-- first wall.
+notGroundPoints :: Maze Char -> [Point]
+notGroundPoints m = let
+  pointsInRow mm r = [(r, c) | c <- [0..width mm - 1]]
+  pointsInCol mm c = [(r, c) | r <- [0..height mm - 1]]
+  takeWhileOuter f xs = takeWhile f xs ++ takeWhile f (reverse xs)
+  rows = [0 .. height m - 1] :: [Int]
+  cols = [0 .. width m - 1]
+  rowPoints = map (pointsInRow m) rows :: [[Point]]
+  horizontalScan = concatMap (takeWhileOuter (testPoint m (== 'G'))) rowPoints :: [Point]
+  colPoints = map (pointsInCol m) cols
+  verticalScan = concatMap (takeWhileOuter (testPoint m (== 'G'))) colPoints :: [Point]
+  in horizontalScan ++ verticalScan
 
-clearNonLoopPoints :: Point -> Maze Tile -> Maze Tile
-clearNonLoopPoints startPoint m = let
-  perimeterPoints = (sort . nub . concat) $ longPaths m [] startPoint
-  in setPoints m perimeterPoints Ground
+-- Expand the maze such that each tile is actually a 3x3 square. This exposes
+-- that there gaps between certain tile configurations. We then perform an aStar
+-- search from every ground tile in the shape to try to find a way out. If there
+-- doesn't exist any path to the outside then the ground is inside the loop.
+countGroundPointsInLoop :: Maze Tile -> Int
+countGroundPointsInLoop m = let
+  biggerM = biggerMaze m
+  groundPoints = filter (testPoint biggerM (=='G')) (allPoints biggerM)
+  pointsWithoutPath = filter (not . hasPathToOutside biggerM) groundPoints
+  in div (length pointsWithoutPath) 9
 
 part2 :: Input -> IO ()
 part2 board = do
@@ -181,12 +205,9 @@ part2 board = do
   let startTile = identifyStartTile board startPoint
   let m = setPoint board startPoint startTile
   let perimeterPoints = (sort . nub . concat) $ longPaths m [] startPoint
-  let otherPoints = (allPoints board) \\ perimeterPoints
+  let otherPoints = allPoints board \\ perimeterPoints
   let mm = setPoints m otherPoints Ground
-  let biggerM = mazeFromList $ biggerMaze (mazeToList mm)
-  let groundPoints = filter (testPoint biggerM (=='G')) (allPoints biggerM)
-  let pointsWithoutPath = filter (not . hasPathToOutside biggerM) groundPoints
-  print $ div (length pointsWithoutPath) 9
+  print $ countGroundPointsInLoop mm
 
 solve :: FilePath -> IO ()
 solve filePath = do

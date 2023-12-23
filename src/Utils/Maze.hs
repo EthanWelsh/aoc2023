@@ -4,10 +4,13 @@ module Utils.Maze (
   Direction(North, South, East, West),
   movePoint,
   mazeFromList,
+  mazeToList,
   height,
   width,
   getPoint,
   setPoint,
+  setPoints,
+  setPointsMatching,
   findPoints,
   testPoint,
   inBounds,
@@ -29,6 +32,9 @@ instance Show a => Show (Maze a) where
 
 mazeFromList :: [[a]] -> Maze a
 mazeFromList m = Maze m
+
+mazeToList :: Maze a -> [[a]]
+mazeToList (Maze m) = m
 
 north :: Point -> Point
 north (r, c) = (r - 1, c)
@@ -77,6 +83,14 @@ replacePoint g (r, c) v = let
 
 setPoint :: Maze a -> Point -> a -> Maze a
 setPoint (Maze m) p v = Maze (replacePoint m p v)
+
+setPoints :: Maze a -> [Point] -> a -> Maze a
+setPoints m ps v = foldl (\mm p -> setPoint mm p v) m ps
+
+setPointsMatching :: Maze a -> (a -> Bool) -> a -> Maze a
+setPointsMatching m f v = let
+  ps = filter (testPoint m f) (allPoints m)
+  in foldl (\mm p -> setPoint mm p v) m ps
 
 testPoint :: Maze a -> (a -> Bool) -> Point -> Bool
 testPoint m f p = f (getPoint m p)
