@@ -4,7 +4,7 @@ import           Data.Function.Memoize
 import qualified Data.Set              as Set
 import           ParserUtils           (Parser)
 import           Text.Megaparsec
-import           Text.Megaparsec.Char  (char, newline, string)
+import           Text.Megaparsec.Char  (char, newline)
 import           Utils.Maze
 
 type Grid = Maze Char
@@ -13,8 +13,8 @@ type Points = Set.Set Point
 
 parseInput :: Parser Input
 parseInput = do
-  lines <- many (char '.' <|> char '#' <|> char 'S') `sepBy` newline
-  return $ mazeFromList lines
+  ls <- many (char '.' <|> char '#' <|> char 'S') `sepBy` newline
+  return $ mazeFromList ls
 
 startPoint :: Grid -> Point
 startPoint m = head $ filter (testPoint m (=='S')) (allPoints m)
