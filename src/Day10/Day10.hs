@@ -6,6 +6,8 @@ import           ParserUtils          (Parser)
 import           Text.Megaparsec
 import           Text.Megaparsec.Char (char, newline)
 import           Utils.Maze
+import           Algorithm.Search
+import Data.Maybe (isJust)
 
 data Tile = Start | Vertical | Horizontal | Ground | NE | NW | SW | SE deriving (Eq)
 type Board = Maze Tile
@@ -111,41 +113,66 @@ part1 board = do
   let d = furthestPointInLoop m startPoint
   print d
 
-pairs :: Show a => [a] -> [(a, a)]
-pairs [] = []
-pairs [x] = error $ "Expected pairs to be passed a list with an even number of elements but got " ++ (show x)
-pairs (x:y:ys) = (x, y) : (pairs ys)
+bigger :: Tile -> [[Char]]
+bigger Vertical =   [ " # "
+                    , " # "
+                    , " # " ]
+bigger Horizontal = [ "   "
+                    , "###"
+                    , "   " ]
+bigger Ground     = [ "GGG"
+                    , "GGG"
+                    , "GGG" ]
+bigger NE         = [ " # "
+                    , " ##"
+                    , "   " ]
+bigger NW         = [ " # "
+                    , "## "
+                    , "   " ]
+bigger SW         = [ "   "
+                    , "## "
+                    , " # " ]
+bigger SE         = [ "   "
+                    , " ##"
+                    , " # " ]
 
-pointsByRow :: [Point] -> [[Point]]
-pointsByRow ps = groupBy (\(r1, _) (r2, _) -> r1 == r2) (sort ps)
-
-pointsWithinLoop :: [Point] -> [Point]
-pointsWithinLoop ps = concatMap pointsInRowWithinLoop (pointsByRow ps)
-
-pointsInRowWithinLoop :: [Point] -> [Point]
-pointsInRowWithinLoop ps = let
-  r = fst (head ps)
-  cs = map snd ps
-  withoutRunsCols = removeMonotonicRuns cs
-  withoutRunsPoints = map (\c -> (r, c)) withoutRunsCols
-  pointsBetweenPair ((_, c1), (_, c2)) = [(r, c) | c <- [c1..c2]]
-  in concatMap pointsBetweenPair (pairs withoutRunsPoints)
-
-countMonotonicRun :: [Int] -> Int
-countMonotonicRun [] = 0
-countMonotonicRun xs = helper (tail xs) (head xs)
+biggerMaze :: [[Tile]] -> [[Char]]
+biggerMaze = concatMap biggerLine
   where
-    helper [] _ = 0
-    helper (y:ys) prev = if y == prev + 1
-                         then 1 + helper ys y
-                         else 0
+    appendAll = zipWith (++)
+    biggerLine (x:xs) = foldl appendAll (bigger x) (map bigger xs)
 
-removeMonotonicRuns :: [Int] -> [Int]
-removeMonotonicRuns [] = []
-removeMonotonicRuns (x:xs) = let
-  toSkip = countMonotonicRun (x:xs) - 1
-  withSkip = drop toSkip xs
-  in x : removeMonotonicRuns withSkip
+distanceFromEdge :: Maze Char -> Point -> Int
+distanceFromEdge m (r, c) = let
+  distanceFromTop = r + 1
+  distanceFromLeft = c + 1
+  distanceFromBottom = abs $ height m - r
+  distanceFromRight = abs $ width m - c
+  verticalDistance = min distanceFromTop distanceFromBottom
+  horizontalDistance = min distanceFromLeft distanceFromRight
+  in verticalDistance + horizontalDistance
+
+neighbors :: Maze Char -> Point -> [Point]
+neighbors m p = let
+  ps = neighbors4 m p
+  in filter (not . testPoint m (=='#')) ps
+
+isEnd :: Maze Char -> Point -> Bool
+isEnd m p = not (all (inBounds m . movePoint p) [North, East, South, West])
+
+hasPathToOutside :: Maze Char -> Point -> Bool
+hasPathToOutside m p = isJust $ aStar (neighbors m) (\_ _ -> 1) (distanceFromEdge m) (isEnd m) p
+
+setStartPoint :: Maze Tile -> Maze Tile
+setStartPoint m = let
+  startPoint = head $ findPoints m (== Start)
+  startTile = identifyStartTile m startPoint
+  in setPoint m startPoint startTile
+
+clearNonLoopPoints :: Point -> Maze Tile -> Maze Tile
+clearNonLoopPoints startPoint m = let
+  perimeterPoints = (sort . nub . concat) $ longPaths m [] startPoint
+  in setPoints m perimeterPoints Ground
 
 part2 :: Input -> IO ()
 part2 board = do
@@ -154,9 +181,12 @@ part2 board = do
   let startTile = identifyStartTile board startPoint
   let m = setPoint board startPoint startTile
   let perimeterPoints = (sort . nub . concat) $ longPaths m [] startPoint
-  let pointsInLoop = pointsWithinLoop perimeterPoints
-  let groundPoints = filter (testPoint board (==Ground)) pointsInLoop
-  print $ length groundPoints
+  let otherPoints = (allPoints board) \\ perimeterPoints
+  let mm = setPoints m otherPoints Ground
+  let biggerM = mazeFromList $ biggerMaze (mazeToList mm)
+  let groundPoints = filter (testPoint biggerM (=='G')) (allPoints biggerM)
+  let pointsWithoutPath = filter (not . hasPathToOutside biggerM) groundPoints
+  print $ div (length pointsWithoutPath) 9
 
 solve :: FilePath -> IO ()
 solve filePath = do
