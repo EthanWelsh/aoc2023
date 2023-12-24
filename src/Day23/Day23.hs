@@ -1,10 +1,8 @@
 module Day23.Day23 (solve) where
 
-import           Data.Function        (on)
-import           Data.List            (maximumBy, (\\))
+import           Data.List            ((\\))
 import           Data.List.Extra      (groupSort)
 import qualified Data.Map             as M
-import qualified Data.Set             as S
 import           ParserUtils          (Parser)
 import           Text.Megaparsec      (choice, errorBundlePretty, many, parse,
                                        sepBy)
@@ -30,19 +28,15 @@ parseInput = do
 endPoint :: Grid -> Point
 endPoint m = (height m - 1, width m - 2)
 
-isEnd :: Grid -> Point -> Bool
-isEnd m p = p == (height m - 1, width m - 2)
-
 pruneMatching :: [a -> Bool] -> [a] -> [a]
 pruneMatching fs = filter (not . anyMatch fs)
   where
     anyMatch ffs x = any (\f -> f x) ffs
 
-step :: Grid -> S.Set Point -> Point -> [Point]
-step m visited p = let
+step :: Grid -> Point -> [Point]
+step m p = let
   currentTile = getPoint m p
   isWall = testPoint m (=='#')
-  isVisited = (`S.member` visited)
   outOfBounds = not . inBounds m
   ns = case currentTile of
     '.' -> neighbors4 m p
@@ -51,28 +45,13 @@ step m visited p = let
     'v' -> [movePoint p South]
     '<' -> [movePoint p West]
     _   -> error "Unexpected tile encountered"
-  in pruneMatching [isWall, isVisited, outOfBounds] ns
-
-longestPathPoints :: Grid -> S.Set Point -> Point -> S.Set Point
-longestPathPoints m visited p = let
-  ns = step m visited p
-  newVisited = S.insert p visited
-  pathPoints = map (longestPathPoints m newVisited) ns
-  longPath = maximumBy (compare `on` S.size) (S.empty : pathPoints)
-  in if isEnd m p then newVisited else longPath
-
-part1 :: Input -> IO ()
-part1 m = do
-  putStr "Part 1: "
-  let startPoint = (0, 1)
-  let pointsInPath = S.toList $ longestPathPoints m S.empty startPoint
-  print $ length pointsInPath - 1
+  in pruneMatching [isWall, outOfBounds] ns
 
 asMap :: Maze Char -> M.Map Point [Point]
 asMap m = let
   ps = pruneMatching [isWall] (allPoints m)
   isWall = testPoint m (=='#')
-  neighborsPerPoint = map (pruneMatching [isWall] . neighbors4 m) ps
+  neighborsPerPoint = map (step m) ps
   in M.fromList (zip ps neighborsPerPoint)
 
 findNextIntersection :: M.Map Point [Point] -> Point -> Point -> (Point, Int)
@@ -107,21 +86,29 @@ simplifyGraph m = let
   in M.fromList xxx
 
 longestPath :: M.Map Point [(Point, Int)] -> (Point -> Bool) -> [(Point, Int)] -> Point -> Int
-longestPath m atEnd steps p
-  | atEnd p = sum $ map snd steps
+longestPath m isEnd steps p
+  | isEnd p = sum $ map snd steps
   | otherwise = let
     ns = filter (\(pp, _) -> pp `notElem` map fst steps) (m M.! p)
-    pathLens = map (\(pp, c) -> longestPath m atEnd ((pp, c):steps) pp) ns
+    pathLens = map (\(pp, c) -> longestPath m isEnd ((pp, c):steps) pp) ns
     in maximum (0:pathLens)
+
+part1 :: Input -> IO ()
+part1 m = do
+  putStr "Part 1: "
+  let startPoint = (0, 1)
+  let isEnd p = endPoint m == p
+  let g = simplifyGraph $ asMap m
+  print $ longestPath g isEnd [] startPoint
 
 part2 :: Input -> IO ()
 part2 m = do
   putStr "Part 2: "
   let startPoint = (0, 1)
-  let atEnd p = (endPoint m) == p
+  let isEnd p = endPoint m == p
   let mm = setPointsMatching m (/='#') '.'
   let g = simplifyGraph $ asMap mm
-  print $ longestPath g atEnd [((0, 1), 0)] startPoint
+  print $ longestPath g isEnd [] startPoint
 
 solve :: FilePath -> IO ()
 solve filePath = do
