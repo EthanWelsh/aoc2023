@@ -1,10 +1,9 @@
 module Day24.Day24 (solve) where
 
+import           Control.Monad        (void)
+import           ParserUtils
 import           Text.Megaparsec
-import Control.Monad (void)
-import Text.Megaparsec.Char (string, char, newline)
-import ParserUtils
-import qualified Text.Megaparsec.Char.Lexer as L
+import           Text.Megaparsec.Char (char, string)
 
 newtype Position = Position (Int, Int, Int) deriving (Show, Eq, Ord)
 newtype Velocity = Velocity (Int, Int, Int) deriving (Show, Eq, Ord)
