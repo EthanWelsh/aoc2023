@@ -1,6 +1,6 @@
 module Day19.Day19 (solve) where
 
-import           ParserUtils     (Parser)
+import           Utils.Parsers   (Parser)
 import           Text.Megaparsec
 --import Control.Monad (void)
 --import Text.Megaparsec.Char (string, char, newline)

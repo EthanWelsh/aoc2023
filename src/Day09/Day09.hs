@@ -1,6 +1,6 @@
 module Day09.Day09 (solve) where
 
-import ParserUtils (Parser)
+import Utils.Parsers (Parser)
 import Text.Megaparsec
 
 type Input = String

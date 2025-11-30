@@ -1,7 +1,7 @@
 module Day24.Day24 (solve) where
 
 import           Control.Monad        (void)
-import           ParserUtils
+import           Utils.Parsers
 import           Text.Megaparsec
 import           Text.Megaparsec.Char (char, string)
 
@@ -10,24 +10,6 @@ newtype Velocity = Velocity (Int, Int, Int) deriving (Show, Eq, Ord)
 data Hail = Hail Position Velocity deriving (Show, Eq, Ord)
 type Input = [Hail]
 
---20, 19, 15 @ 1, -5, -3
-
-negativeInteger :: Parser Int
-negativeInteger = do
-  void $ char '-'
-  n <- integer
-  return (n * (-1))
-
-signedInteger :: Parser Int
-signedInteger = negativeInteger <|> integer
-
-manySpaces :: Parser ()
-manySpaces = void $ many (char ' ')
-
-commaAndSpaces :: Parser ()
-commaAndSpaces = do
-  void $ char ','
-  manySpaces
 
 parseXyz :: Parser (Int, Int, Int)
 parseXyz = do

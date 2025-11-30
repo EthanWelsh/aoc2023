@@ -2,7 +2,7 @@ module Day21.Day21 (solve) where
 
 import           Data.Function.Memoize
 import qualified Data.Set              as Set
-import           ParserUtils           (Parser)
+import           Utils.Parsers        (Parser)
 import           Text.Megaparsec
 import           Text.Megaparsec.Char  (char, newline)
 import           Utils.Maze

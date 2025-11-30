@@ -3,7 +3,8 @@ module Day07.Day07 (solve) where
 import           Control.Monad        (void)
 import           Data.Char            (intToDigit)
 import           Data.List            (group, sort, sortBy)
-import           ParserUtils          (Parser, integer)
+import           Utils.Parsers        (Parser, integer)
+import           Utils.List           (replace)
 import           Text.Megaparsec
 import           Text.Megaparsec.Char
 
@@ -126,8 +127,7 @@ handRankWithJacks h = let
   ranksWithJacks = map (upgradeRank (jacksCount h)) ranksWithoutJacks
   in maximum ranksWithJacks
 
-replace :: Eq a => a -> a -> [a] -> [a]
-replace old new xs = map (\x -> if x == old then new else x) xs
+-- replace moved to Utils.List
 
 comparePt2 :: Hand -> Hand -> Ordering
 comparePt2 a@(Hand aa) b@(Hand bb) = let

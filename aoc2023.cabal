@@ -15,7 +15,7 @@ extra-source-files:  README.md
 executable aoc2023
   hs-source-dirs:      src
   main-is:             Main.hs
-  other-modules:       ParserUtils
+  other-modules:       Utils.Parsers
                      , Day00.Test
                      , Day01.Day01
                      , Day02.Day02
@@ -44,6 +44,7 @@ executable aoc2023
                      , Day25.Day25
                      , Utils.Graph
                      , Utils.Maze
+                     , Utils.List
                      , Utils.Search
   default-language:    Haskell2010
   default-extensions:  TupleSections

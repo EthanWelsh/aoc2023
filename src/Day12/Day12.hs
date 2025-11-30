@@ -3,7 +3,7 @@ module Day12.Day12 (solve) where
 import           Control.Monad         (void)
 import           Data.Function.Memoize
 import           Data.List             (intercalate)
-import           ParserUtils           (Parser, integer)
+import           Utils.Parsers        (Parser, integer)
 import           Text.Megaparsec
 import           Text.Megaparsec.Char  (char)
 

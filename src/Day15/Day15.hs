@@ -4,7 +4,7 @@ import           Control.Lens
 import           Control.Monad        (void)
 import           Data.Char
 import           Data.List            (findIndices)
-import           ParserUtils          (Parser, integer)
+import           Utils.Parsers        (Parser, integer)
 import           Text.Megaparsec hiding (label)
 import           Text.Megaparsec.Char (alphaNumChar, char)
 

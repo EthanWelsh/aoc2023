@@ -1,4 +1,4 @@
-module ParserUtils (
+module Utils.Parsers (
     Parser,
     sc,
     lexeme,
@@ -11,15 +11,19 @@ module ParserUtils (
     pipe,
     parens,
     skipSpaces,
+    manySpaces,
+    commaAndSpaces,
+    negativeInteger,
+    signedInteger,
     charInRange
-)
-where
+) where
 
 import           Control.Monad              (void)
 import           Data.Void                  (Void)
 import           Text.Megaparsec            (Parsec, between, empty, many,
                                              satisfy)
-import           Text.Megaparsec.Char       (space1, string)
+import           Control.Applicative        ((<|>))
+import           Text.Megaparsec.Char       (space1, string, char)
 import qualified Text.Megaparsec.Char.Lexer as L
 
 type Parser = Parsec Void String
@@ -59,3 +63,21 @@ skipSpaces = void $ many (string " ")
 
 charInRange :: Char -> Char -> Parser Char
 charInRange start end = satisfy (\x -> x >= start && x <= end)
+
+-- Parse zero-or-more literal spaces (keeps parity with existing callers)
+manySpaces :: Parser ()
+manySpaces = skipSpaces
+
+commaAndSpaces :: Parser ()
+commaAndSpaces = do
+  void $ char ','
+  manySpaces
+
+negativeInteger :: Parser Int
+negativeInteger = do
+  void $ char '-'
+  n <- integer
+  return (n * (-1))
+
+signedInteger :: Parser Int
+signedInteger = negativeInteger <|> integer

@@ -4,10 +4,11 @@ import           Control.Monad        (void)
 import           Data.Function        (on)
 import           Data.List            (maximumBy)
 import qualified Data.Map             as M
-import           ParserUtils
+import           Utils.Parsers
 import           Text.Megaparsec
 import           Text.Megaparsec.Char (char, newline, string)
 import           Utils.Graph
+import           Utils.List           (pairs)
 import           Utils.Search
 
 type Input = M.Map String [String]
@@ -27,10 +28,7 @@ parseInput = do
   ls <- parseLine `sepBy` newline
   return $ M.fromList ls
 
-pairs :: [a] -> [(a, a)]
-pairs []       = []
-pairs [_]      = []
-pairs (x:y:ys) = (x, y) : (pairs (y:ys))
+-- pairs moved to Utils.List
 
 mostUsedEdge :: Ord a => Graph a -> a -> a -> (a, a)
 mostUsedEdge g src dst = let

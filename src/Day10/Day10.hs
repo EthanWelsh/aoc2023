@@ -3,7 +3,7 @@ module Day10.Day10 (solve) where
 import           Algorithm.Search
 import           Data.List            (elemIndex, nub, sort, (\\))
 import           Data.Maybe           (fromJust, isJust)
-import           ParserUtils          (Parser)
+import           Utils.Parsers        (Parser)
 import           Text.Megaparsec
 import           Text.Megaparsec.Char (char, newline)
 import           Utils.Maze

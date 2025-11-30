@@ -2,7 +2,7 @@ module Day04.Day04 (solve) where
 
 import           Control.Monad        (void)
 import           Data.List            (intersect)
-import           ParserUtils          (Parser, colon, integer, lexeme, pipe)
+import           Utils.Parsers        (Parser, colon, integer, lexeme, pipe)
 import           Text.Megaparsec
 import           Text.Megaparsec.Char (string)
 

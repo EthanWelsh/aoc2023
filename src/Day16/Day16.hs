@@ -1,6 +1,6 @@
 module Day16.Day16 (solve) where
 
-import           ParserUtils     (Parser)
+import           Utils.Parsers    (Parser)
 import           Text.Megaparsec
 import Text.Megaparsec.Char (char, newline)
 import Utils.Maze

@@ -1,7 +1,7 @@
 module Day06.Day06 (solve) where
 
 import           Control.Monad        (void)
-import           ParserUtils          (Parser, integer, skipSpaces)
+import           Utils.Parsers        (Parser, integer, skipSpaces)
 import           Text.Megaparsec
 import           Text.Megaparsec.Char (string)
 

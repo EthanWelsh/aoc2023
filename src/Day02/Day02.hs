@@ -1,6 +1,6 @@
 module Day02.Day02 (solve) where
 
-import           ParserUtils          (Parser, integer)
+import           Utils.Parsers        (Parser, integer)
 import           Text.Megaparsec
 import           Text.Megaparsec.Char (newline, string)
 

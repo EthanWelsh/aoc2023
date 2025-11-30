@@ -7,7 +7,8 @@ import qualified Data.IntervalSet     as IntervalSet
 import           Data.List            (find)
 import           Data.Maybe
 import qualified Data.Set             as Set
-import           ParserUtils          (Parser, integer)
+import           Utils.Parsers        (Parser, integer)
+import           Utils.List           (pairsByTwo)
 import           Text.Megaparsec
 import           Text.Megaparsec.Char (string)
 
@@ -73,10 +74,7 @@ mapFromResourceMap rs t = fromMaybe t mpd
 mapFromResourceMaps :: [ResourceMap] -> Int -> Int
 mapFromResourceMaps maps t = foldl (flip mapFromResourceMap) t maps
 
-pairs :: [a] -> [(a, a)]
-pairs (a:b:xs) = (a, b) : pairs xs
-pairs [_]      = error "expected multiples of two"
-pairs []       = []
+-- moved pairs to Utils.List as pairsByTwo
 
 createInterval :: (Int, Int) -> Interval Int
 createInterval (s, l) = start <=..< end
@@ -86,7 +84,7 @@ createInterval (s, l) = start <=..< end
 
 seedsAsRanges :: [Int] -> IntervalSet.IntervalSet Int
 seedsAsRanges seeds = let
-  ps = pairs seeds :: [(Int, Int)]
+  ps = pairsByTwo seeds :: [(Int, Int)]
   intervals = map createInterval ps :: [Interval Int]
   in IntervalSet.fromList intervals
 

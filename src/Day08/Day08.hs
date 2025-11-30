@@ -2,7 +2,7 @@ module Day08.Day08 (solve) where
 
 import           Control.Monad        (void)
 import qualified Data.HashMap         as HM
-import           ParserUtils          (Parser, charInRange)
+import           Utils.Parsers       (Parser, charInRange)
 import           Text.Megaparsec
 import           Text.Megaparsec.Char (char, newline, string)
 

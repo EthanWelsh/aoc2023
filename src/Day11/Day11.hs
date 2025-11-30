@@ -1,7 +1,7 @@
 module Day11.Day11 (solve) where
 
 import Text.Megaparsec
-import ParserUtils (Parser)
+import Utils.Parsers (Parser)
 --import Control.Monad (void)
 --import Text.Megaparsec.Char (string, char, newline)
 

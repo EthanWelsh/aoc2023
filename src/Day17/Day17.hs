@@ -4,7 +4,7 @@ import           Algorithm.Search     (aStar)
 import           Data.Char            (digitToInt)
 import           Data.List            ((\\))
 import           Data.Maybe           (fromJust)
-import           ParserUtils          (Parser, charInRange)
+import           Utils.Parsers       (Parser, charInRange)
 import           Text.Megaparsec      hiding (State)
 import           Text.Megaparsec.Char (newline)
 import           Utils.Maze

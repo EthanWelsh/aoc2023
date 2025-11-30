@@ -3,11 +3,12 @@ module Day23.Day23 (solve) where
 import           Data.List            ((\\))
 import           Data.List.Extra      (groupSort)
 import qualified Data.Map             as M
-import           ParserUtils          (Parser)
+import           Utils.Parsers        (Parser)
 import           Text.Megaparsec      (choice, errorBundlePretty, many, parse,
                                        sepBy)
 import           Text.Megaparsec.Char (char, newline)
 import           Utils.Maze
+import           Utils.List           (pruneMatching)
 
 type Grid = Maze Char
 type Input = Grid
@@ -28,10 +29,7 @@ parseInput = do
 endPoint :: Grid -> Point
 endPoint m = (height m - 1, width m - 2)
 
-pruneMatching :: [a -> Bool] -> [a] -> [a]
-pruneMatching fs = filter (not . anyMatch fs)
-  where
-    anyMatch ffs x = any (\f -> f x) ffs
+-- pruneMatching moved to Utils.List
 
 step :: Grid -> Point -> [Point]
 step m p = let
